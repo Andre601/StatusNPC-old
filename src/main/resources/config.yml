@@ -1,0 +1,54 @@
+#
+# Set to true, if you want debug messages to be send.
+# Debug messages start with a [DEBUG]. This may cause spam to your console.
+#
+Debug: false
+NPC:
+  #
+  # Set the colors used for the different states of the players a NPC is associated with.
+  # The stats "AFK" is only used, if EssentialsX is installed.
+  #
+  # You can use the following colors:
+  #   AQUA
+  #   BLACK
+  #   BLUE
+  #   DARK_AQUA
+  #   DARK_BLUE
+  #   DARK_GRAY
+  #   DARK_GREEN
+  #   DARK_PURPLE
+  #   DARK_RED
+  #   GOLD
+  #   GRAY
+  #   GREEN
+  #   LIGHT_PURPLE
+  #   RED
+  #   WHITE
+  #   YELLOW
+  #
+  Colors:
+    Online: 'GREEN'
+    Offline: 'RED'
+    AFK: 'GOLD'
+Messages:
+  Help:
+  - '&b/snpc help'
+  - '  &7Displays this help.'
+  - '&b/snpc set <player> <id>'
+  - '  &7Links a NPC with a player to display the status.'
+  - '&b/snpc remove <player>'
+  - '  &7Removes the link of a NPC and player.'
+  Errors:
+    FewArgs:
+      Set: '&cToo few arguments! Syntax: &7/snpc set <player> <id>'
+      Remove: '&cToo few arguments! Syntax: &7/snpc remove <player>'
+      Other: '&cToo few arguments! Use &7/snpc help &cfor help.'
+    InvalidArgs: '&cInvalid arguments! Use &7/snpc help &cfor help.'
+    InvalidPlayer: '&cThe provided player is invalid! Make sure they''re online.'
+    InvalidNPC: '&cCouldn''t find NPC with id %id%. Make sure the id is correct!'
+    NotSet: '&cThe provided player doesn''t have any NPC set to them.'
+    NoPlayer: 'The command can only be executed as a player.'
+    NoPerms: '&You need the permission statusnpc.use to use the commands!'
+    NPCNotPlayer: '&cThe provided NPC is not of the type Player! Only Player NPCs are supported.'
+  SetNPC: '&aNPC (id: %id%) set as StatusNPC for Player %player%.'
+  RemovedNPC: '&aRemoved NPC of player %player%.'

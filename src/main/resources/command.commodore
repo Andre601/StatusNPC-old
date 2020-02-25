@@ -1,0 +1,11 @@
+statusnpc {
+  help;
+  set {
+    player brigadier:string single_word {
+      id brigadier:integer;
+    }
+  }
+  remove {
+    player brigadier:string single_word;
+  }
+}
