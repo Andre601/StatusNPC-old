@@ -24,4 +24,3 @@ This supports and requires Essentials (EssentialsX is recommendet).
 - The plugin utilizes the Scoreboard (Through Citizens' ScoreboardTrait option) to display a different glow color for the NPC.  
 This has the unwanted side-effect that Players with the same name will have their name-tag color changed in the tab.
 - Only Player NPCs are usable through this plugin.
-- Multiple players can have the same NPC set, causing fast/flashy changes of color.

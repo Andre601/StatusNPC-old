@@ -97,6 +97,11 @@ public class CmdStatusNPC implements CommandExecutor{
         
                 try{
                     int id = Integer.parseInt(args[2]);
+                    if(plugin.getLoaded().containsKey(id)){
+                        sender.sendMessage(plugin.getFormatUtil().getLine("Messages.Errors.AlreadySet"));
+                        return true;
+                    }
+                    
                     plugin.getNpcManager().saveNPC(sender, target, id);
                     return true;
                 }catch(NumberFormatException ex){

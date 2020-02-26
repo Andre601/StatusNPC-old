@@ -39,6 +39,7 @@ Messages:
   - '&b/snpc remove <player>'
   - '  &7Removes the link of a NPC and player.'
   Errors:
+    AlreadySet: '&cThe provided NPC is already set for a player! Either remove the set NPC or choose another one.'
     FewArgs:
       Set: '&cToo few arguments! Syntax: &7/snpc set <player> <id>'
       Remove: '&cToo few arguments! Syntax: &7/snpc remove <player>'
