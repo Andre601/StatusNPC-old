@@ -2,6 +2,8 @@
 StatusNPC is a simple plugin which allows you to display the online status of a Player using NPCs from Citizens.  
 The status is shown through a colored glow.
 
+![Example](https://thumbs.gfycat.com/TenseUnsightlyAmericankestrel-size_restricted.gif)
+
 ## How to use
 To set a NPC as StatusNPC, use `/snpc set <player> <id>`  
 Replace `<player>` with the player's name and `<id>` with the id of the NPC.
