@@ -88,13 +88,13 @@ public class StatusNPC extends JavaPlugin{
             return;
         }
         command.setExecutor(new CmdStatusNPC(this));
-        getLogger().info("[Startup - Command] Loaded command /statusnpc");
         
         if(CommodoreProvider.isSupported()){
             Commodore commodore = CommodoreProvider.getCommodore(this);
             
             registerCompletions(commodore, command);
         }
+        getLogger().info("[Startup - Command] Loaded command /statusnpc");
         
         getLogger().info("[Startup] Starting of StatusNPC complete!");
     }
@@ -105,7 +105,7 @@ public class StatusNPC extends JavaPlugin{
             LiteralCommandNode<?> cmd = CommodoreFileFormat.parse(this.getResource("command.commodore"));
             commodore.register(command, cmd);
         }catch(IOException ex){
-            getLogger().warning("Couldn't load plugin. Commodore caused an exception!");
+            getLogger().warning("[Startup - Command] Couldn't load plugin. Commodore caused an exception!");
             ex.printStackTrace();
         }
     }

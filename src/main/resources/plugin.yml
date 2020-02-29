@@ -4,6 +4,10 @@ author: Andre_601
 
 main: com.andre601.statusnpc.StatusNPC
 
+#
+# The plugin *should* work in older versions.
+# This is only to prevent the "Plugin xyz doesn't define an api-version" spam on startup.
+#
 api-version: '1.13'
 
 softdepend:

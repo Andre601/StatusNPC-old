@@ -30,7 +30,13 @@ NPC:
     Online: 'GREEN'
     Offline: 'RED'
     AFK: 'GOLD'
+#
+# The various messages of the plugin to customize.
+#
 Messages:
+  #
+  # The help message displayed when using "/snpc help".
+  #
   Help:
   - '&b/snpc help'
   - '  &7Displays this help.'
@@ -39,17 +45,58 @@ Messages:
   - '&b/snpc remove <player>'
   - '  &7Removes the link of a NPC and player.'
   Errors:
+    #
+    # When a selected NPC is already set for another player.
+    #
     AlreadySet: '&cThe provided NPC is already set for a player! Either remove the set NPC or choose another one.'
+    #
+    # The different "Too few arguments" messages used for "/snpc set <player> <id>" (Set), "/snpc remove <player>" (Remove)
+    # and all other cases.
+    #
     FewArgs:
       Set: '&cToo few arguments! Syntax: &7/snpc set <player> <id>'
       Remove: '&cToo few arguments! Syntax: &7/snpc remove <player>'
       Other: '&cToo few arguments! Use &7/snpc help &cfor help.'
+    #
+    # When a invalid argument was provided.
+    #
     InvalidArgs: '&cInvalid arguments! Use &7/snpc help &cfor help.'
+    #
+    # Bukkit/Spigot requires the player to be online, to handle names properly. This message is shown if the provided
+    # player isn't online.
+    #
     InvalidPlayer: '&cThe provided player is invalid! Make sure they''re online.'
+    #
+    # When a invalid id was povided and therefore the NPC wasn't found.
+    #
     InvalidNPC: '&cCouldn''t find NPC with id %id%. Make sure the id is correct!'
+    #
+    # When using "/snpc remove <player>" while <player> has no NPC set to them.
+    #
     NotSet: '&cThe provided player doesn''t have any NPC set to them.'
-    NoPlayer: 'The command can only be executed as a player.'
+    #
+    # When you lack the permission statusnpc.use
+    #
     NoPerms: '&You need the permission statusnpc.use to use the commands!'
-    NPCNotPlayer: '&cThe provided NPC is not of the type Player! Only Player NPCs are supported.'
+    #
+    # When you use a NPC which isn't of the type Player.
+    #
+    # Placeholder:
+    #   %type%  ->  The Entity type that was provided.
+    #
+    NPCNotPlayer: '&cInvalid NPC type %type%! Only NPCs of type Player are allowed.'
+  #
+  # When an NPC was set as StatusNPC successfully.
+  #
+  # Placeholders:
+  #   %id%      ->  The ID of the NPC.
+  #   %player%  ->  The Player the NPC was linked to.
+  #
   SetNPC: '&aNPC (id: %id%) set as StatusNPC for Player %player%.'
+  #
+  # When an NPC was removed from a player.
+  #
+  # Placeholder:
+  #   %player%  ->  The Player the NPC was unlinked from.
+  #
   RemovedNPC: '&aRemoved NPC of player %player%.'
