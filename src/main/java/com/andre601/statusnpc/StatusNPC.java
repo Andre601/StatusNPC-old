@@ -34,7 +34,7 @@ public class StatusNPC extends JavaPlugin{
     private Map<Integer, String> loaded = new HashMap<>();
     
     public void onEnable(){
-        getLogger().info("[Startup] Enabling NPCStatus v" + getDescription().getVersion());
+        getLogger().info("[Startup] Enabling StatusNPC v" + getDescription().getVersion());
         
         saveDefaultConfig();
         
