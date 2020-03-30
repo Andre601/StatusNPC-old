@@ -44,6 +44,8 @@ Messages:
   - '  &7Links a NPC with a player to display the status.'
   - '&b/snpc remove <player>'
   - '  &7Removes the link of a NPC and player.'
+  - '&b/snpc list'
+  - '  &7Lists all linked NPCs and players.'
   Errors:
     #
     # When a selected NPC is already set for another player.
@@ -54,9 +56,9 @@ Messages:
     # and all other cases.
     #
     FewArgs:
-      Set: '&cToo few arguments! Syntax: &7/snpc set <player> <id>'
-      Remove: '&cToo few arguments! Syntax: &7/snpc remove <player>'
-      Other: '&cToo few arguments! Use &7/snpc help &cfor help.'
+      Set: '&cToo few or wrong arguments! Syntax: &7/snpc set <player> <id>'
+      Remove: '&cToo few or wrong arguments! Syntax: &7/snpc remove <player>'
+      Other: '&cToo few or wrong arguments! Use &7/snpc help &cfor help.'
     #
     # When a invalid argument was provided.
     #
@@ -75,9 +77,13 @@ Messages:
     #
     NotSet: '&cThe provided player doesn''t have any NPC set to them.'
     #
-    # When you lack the permission statusnpc.use
+    # When you lack the permissions to perform commands.
     #
-    NoPerms: '&You need the permission statusnpc.use to use the commands!'
+    NoPerms: '&cYou lack the permissions to do this!'
+    #
+    # When you run a command from console, that can only be executed as a player.
+    #
+    NoPlayer: '&cThis command can only be executed as a player!'
     #
     # When you use a NPC which isn't of the type Player.
     #
@@ -90,9 +96,11 @@ Messages:
   #
   # Placeholders:
   #   %id%      ->  The ID of the NPC.
+  #   %name%    ->  The name of the NPC.
   #   %player%  ->  The Player the NPC was linked to.
+  #   %uuid%    ->  The UUID of the player.
   #
-  SetNPC: '&aNPC (id: %id%) set as StatusNPC for Player %player%.'
+  SetNPC: '&aNPC %name% (%id%) set as StatusNPC for Player %player%.'
   #
   # When an NPC was removed from a player.
   #
@@ -100,3 +108,26 @@ Messages:
   #   %player%  ->  The Player the NPC was unlinked from.
   #
   RemovedNPC: '&aRemoved NPC of player %player%.'
+  #
+  # The syntax, in which the NPC and linked player are displayed.
+  #
+  # Title is the top line of the list
+  # Syntax is the Style in which each linked NPC is listed.
+  # Hover is the text shown, when hovering over an entry.
+  # Unknown is the player name displayed, when it isn't known.
+  #
+  # Placeholders:
+  #   %id%      ->  The ID of the NPC.
+  #   %name%    ->  The name of the NPC.
+  #   %player%  ->  The name of the linked player.
+  #   %uuid%    ->  The UUID of the player.
+  #
+  List:
+    Title: '&7Linked NPCs (Hover for info)'
+    Syntax: '&b%id% &7- &b%name%'
+    Hover:
+    - '&7Name:'
+    - '  &b%player%'
+    - '&7UUID:'
+    - '  &b%uuid%'
+    Unknown: '&oUnknown'

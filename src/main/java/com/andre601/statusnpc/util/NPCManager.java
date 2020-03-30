@@ -5,165 +5,144 @@ import net.citizensnpcs.api.CitizensAPI;
 import net.citizensnpcs.api.npc.NPC;
 import net.citizensnpcs.trait.ScoreboardTrait;
 import org.bukkit.ChatColor;
-import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 
-public class NPCManager {
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 
+public class NPCManager{
+    
     private StatusNPC plugin;
-
+    
+    private Map<Integer, UUID> loaded = new HashMap<>();
+    
     public NPCManager(StatusNPC plugin){
         this.plugin = plugin;
     }
     
-    public void setNPCStatus(String uuid, int id, OnlineStatus status){
-        plugin.sendDebug("Setting NPC color of NPC " + id + ".");
-        
-        NPC npc = CitizensAPI.getNPCRegistry().getById(id);
-        
+    public void setNPCGlow(UUID uuid, int id, OnlineStatus status, boolean withSave){
+        NPC npc = getNPC(id);
         if(npc == null){
-            plugin.sendDebug("Could not set color! NPC was null.");
+            plugin.sendDebug("Could not set NPC color. The NPC was null!");
             return;
         }
         
-        NPCColor color = NPCColor.getNPCColorByName(plugin.getConfig().getString("NPC.Colors." + status.getStatus()));
-        
+        NPCColor color = NPCColor.getColorByName(plugin.getConfig().getString("NPC.Colors." + status.getStatus()));
         if(status == OnlineStatus.AFK && !plugin.isEssentialsEnabled()){
-            plugin.sendDebug("Got status AFK, but Essentials isn't enabled! Defaulting to gray color.");
+            plugin.sendDebug("Received Online status AFK, but Essentials is not installed/enabled. Defaulting to GRAY");
             color = NPCColor.GRAY;
         }
         
-        if(color == null){
-            plugin.sendDebug("Got invalid status " + status.getStatus() + "! Defaulting to gray color.");
-            color = NPCColor.GRAY;
-        }
+        setNPCGlow(npc, color);
         
-        npc.getTrait(ScoreboardTrait.class).setColor(color.getColor());
-        npc.data().setPersistent(NPC.GLOWING_METADATA, true);
-        
-        plugin.getLoaded().put(id, uuid);
-        
-        plugin.sendDebug("Color for NPC " + id + " set to color " + color.getName());
-    }
-    
-    public void resetNPCStatus(){
-        for(String key : plugin.getNpcConfig().getKeys(false)){
-            ConfigurationSection section = plugin.getNpcConfig().getConfigurationSection(key);
-            if(section == null || !section.contains("ID"))
-                continue;
-            
-            if(CitizensAPI.getNPCRegistry().getById(section.getInt("ID")) == null)
-                continue;
-            
-            setNPCStatus(key, section.getInt("ID"), OnlineStatus.OFFLINE);
-        }
-    }
-    
-    public void saveNPC(CommandSender sender, Player player, int id){
-        plugin.sendDebug("Saving Player " + player.getName() + " (" + player.getUniqueId() + ") with NPC " + id);
-        
-        if(CitizensAPI.getNPCRegistry().getById(id) == null){
-            sender.sendMessage(plugin.getFormatUtil().getLine("Messages.Errors.InvalidNPC").replace("%id%", "" + id));
-            return;
-        }
-        
-        if(!(CitizensAPI.getNPCRegistry().getById(id).getEntity() instanceof Player)){
-            sender.sendMessage(plugin.getFormatUtil().getLine("Messages.Errors.NPCNotPlayer"));
-            
-            return;
-        }
-        
-        plugin.getNpcConfig().set(player.getUniqueId().toString() + ".ID", id);
-        plugin.getFileManager().save();
-        
-        setNPCStatus(player.getUniqueId().toString(), id, OnlineStatus.ONLINE);
-        plugin.sendDebug("Player saved!");
-        
-        sender.sendMessage(plugin.getFormatUtil().getLine("Messages.SetNPC")
-                .replace("%id%", "" + id)
-                .replace("%player%", player.getName())
-        );
-    }
-    
-    public void deleteNPC(CommandSender sender, Player player){
-        plugin.sendDebug("Deleting NPC for Player " + player.getName() + " (" + player.getUniqueId() + ") from storage.");
-        
-        if(hasNPC(player)){
-            int id = plugin.getNpcConfig().getInt(player.getUniqueId().toString() + ".ID");
-            
-            NPC npc = CitizensAPI.getNPCRegistry().getById(id);
-            if(npc != null){
-                npc.data().setPersistent(NPC.GLOWING_METADATA, false);
-                npc.getTrait(ScoreboardTrait.class).setColor(NPCColor.WHITE.getColor());
-            }
-            
-            plugin.getNpcConfig().set(player.getUniqueId().toString(), null);
+        if(withSave){
+            plugin.getNpcConfig().set(uuid.toString() + ".ID", id);
             plugin.getFileManager().save();
-            
-            plugin.getLoaded().remove(id);
-            
-            plugin.sendDebug("Removed NPC of player " + player.getName() + " (" + player.getUniqueId() + ")");
-            sender.sendMessage(plugin.getFormatUtil().getLine("Messages.RemovedNPC").replace("%player%", player.getName()));
-        }else{
-            sender.sendMessage(plugin.getFormatUtil().getLine("Messages.Errors.NotSet"));
         }
+        
+        loaded.put(npc.getId(), uuid);
+        plugin.sendDebug("Set Color for NPC " + id + " to " + color.getName());
     }
     
-    public void deleteNPC(int id){
+    public void loadNPCs(){
         for(String key : plugin.getNpcConfig().getKeys(false)){
             ConfigurationSection section = plugin.getNpcConfig().getConfigurationSection(key);
+            
             if(section == null || !section.contains("ID"))
                 continue;
             
-            if(section.getInt("ID") != id)
+            NPC npc = getNPC(UUID.fromString(key));
+            if(npc == null)
                 continue;
             
-            plugin.getNpcConfig().set(key, null);
+            loaded.put(npc.getId(), UUID.fromString(key));
+            setNPCGlow(UUID.fromString(key), npc.getId(), OnlineStatus.OFFLINE, false);
+        }
+    }
+    
+    public void updateNPC(Player player, int oldId, int newId){
+        NPC npcOld = getNPC(oldId);
+        NPC npcNew = getNPC(newId);
+        
+        if(npcOld == null || npcNew == null)
+            return;
+        
+        removeNPCGlow(npcOld.getId(), false);
+        setNPCGlow(player.getUniqueId(), newId, OnlineStatus.ONLINE, true);
+    }
+    
+    public void removeNPCGlow(int id, boolean withDelete){
+        if(!loaded.containsKey(id))
+            return;
+        
+        NPC npc = getNPC(id);
+        if(npc == null)
+            return;
+        
+        setNPCGlow(npc, null);
+        
+        String uuid = getUUID(id);
+        if((uuid != null) && withDelete){
+            plugin.getNpcConfig().set(uuid, null);
             plugin.getFileManager().save();
-            
-            plugin.getLoaded().remove(id);
-            break;
         }
+        loaded.remove(id);
     }
     
-    public boolean hasNPC(Player player){
-        return plugin.getLoaded().containsValue(player.getUniqueId().toString());
+    public boolean hasNPC(UUID uuid){
+        return getNPC(uuid) != null;
     }
     
-    public boolean hasNPC(int id){
-        return plugin.getLoaded().containsKey(id);
+    public NPC getNPC(UUID uuid){
+        return getNPC(plugin.getNpcConfig().getInt(uuid.toString() + ".ID"));
     }
     
-    public boolean hasSavedNPC(int id){
+    public NPC getNPC(int id){
+        return CitizensAPI.getNPCRegistry().getById(id);
+    }
+    
+    public int getNPCId(Player player){
+        return plugin.getNpcConfig().getInt(player.getUniqueId().toString() + ".ID", -1);
+    }
+    
+    public Map<NPC, UUID> getAllNPC(){
+        Map<NPC, UUID> npcs = new HashMap<>();
         for(String key : plugin.getNpcConfig().getKeys(false)){
             ConfigurationSection section = plugin.getNpcConfig().getConfigurationSection(key);
+            
             if(section == null || !section.contains("ID"))
                 continue;
             
-            if(section.getInt("ID") != id)
+            NPC npc = getNPC(section.getInt("ID"));
+            if(npc == null)
                 continue;
             
-            return true;
+            npcs.put(npc, UUID.fromString(key));
         }
         
-        return false;
+        return npcs;
     }
     
-    public String getUUID(int id){
-        if(hasNPC(id))
-            return plugin.getLoaded().get(id);
-        
+    public Map<Integer, UUID> getLoaded(){
+        return loaded;
+    }
+    
+    private void setNPCGlow(NPC npc, NPCColor color){
+        npc.getTrait(ScoreboardTrait.class).setColor(color == null ? NPCColor.WHITE.getColor() : color.getColor());
+        npc.data().setPersistent(NPC.GLOWING_METADATA, color != null);
+    }
+    
+    private String getUUID(int id){
         for(String key : plugin.getNpcConfig().getKeys(false)){
             ConfigurationSection section = plugin.getNpcConfig().getConfigurationSection(key);
-    
+            
             if(section == null || !section.contains("ID"))
                 continue;
-    
-            if(section.getInt("ID") != id)
-                continue;
             
-            return key;
+            if(section.getInt("ID") == id)
+                return key;
         }
         
         return null;
@@ -172,6 +151,7 @@ public class NPCManager {
     /*
      * Enum for convenience as Spigot is really shit with their Color class.
      */
+    @SuppressWarnings("unused")
     public enum NPCColor{
         AQUA        (ChatColor.AQUA,         "Aqua"),
         BLACK       (ChatColor.BLACK,        "Black"),
@@ -198,13 +178,13 @@ public class NPCManager {
             this.name = name;
         }
         
-        public static NPCColor getNPCColorByName(String name){
-            for(NPCColor color : values()){
+        public static NPCManager.NPCColor getColorByName(String name){
+            for(NPCManager.NPCColor color : values()){
                 if(color.name().equalsIgnoreCase(name))
                     return color;
             }
             
-            return null;
+            return GRAY;
         }
         
         public ChatColor getColor(){
@@ -215,5 +195,4 @@ public class NPCManager {
             return name;
         }
     }
-
 }

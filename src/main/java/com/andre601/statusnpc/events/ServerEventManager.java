@@ -18,6 +18,6 @@ public class ServerEventManager implements Listener{
     @EventHandler
     public void onLoad(ServerLoadEvent event){
         plugin.sendDebug("Resetting all NPCs...");
-        plugin.getNpcManager().resetNPCStatus();
+        plugin.getNpcManager().loadNPCs();
     }
 }

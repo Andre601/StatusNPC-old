@@ -1,10 +1,11 @@
 package com.andre601.statusnpc.events;
 
 import com.andre601.statusnpc.StatusNPC;
-import net.citizensnpcs.api.event.NPCDeathEvent;
+import net.citizensnpcs.api.event.NPCCreateEvent;
 import net.citizensnpcs.api.event.NPCRemoveEvent;
-import net.citizensnpcs.api.event.NPCSpawnEvent;
+import net.citizensnpcs.api.npc.NPC;
 import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 
@@ -19,24 +20,14 @@ public class NPCEventManager implements Listener{
     
     @EventHandler
     public void onRemove(NPCRemoveEvent event){
-        plugin.getNpcManager().deleteNPC(event.getNPC().getId());
+        plugin.getNpcManager().removeNPCGlow(event.getNPC().getId(), true);
+        plugin.getNpcs().remove(String.valueOf(event.getNPC().getId()));
     }
     
     @EventHandler
-    public void onDeath(NPCDeathEvent event){
-        for(Integer id : plugin.getLoaded().keySet()){
-            if(id == event.getNPC().getId()){
-                plugin.getLoaded().remove(id);
-                break;
-            }
-        }
-    }
-    
-    @EventHandler
-    public void onRespawn(NPCSpawnEvent event){
-        int id = event.getNPC().getId();
-        
-        if(plugin.getNpcManager().hasSavedNPC(id))
-            plugin.getLoaded().put(id, plugin.getNpcManager().getUUID(id));
+    public void onCreate(NPCCreateEvent event){
+        NPC npc = event.getNPC();
+        if(npc.getEntity() instanceof Player)
+            plugin.getNpcs().add(String.valueOf(npc.getId()));
     }
 }

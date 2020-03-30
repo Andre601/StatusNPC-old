@@ -22,27 +22,27 @@ public class PlayerEventManager implements Listener{
     public void onJoin(PlayerJoinEvent event){
         Player player = event.getPlayer();
         
-        if(!plugin.getNpcManager().hasNPC(player))
+        if(!plugin.getNpcManager().hasNPC(player.getUniqueId()))
             return;
         
-        int id = plugin.getNpcConfig().getInt(player.getUniqueId() + ".ID", -1);
+        int id = plugin.getNpcManager().getNPCId(player);
         if(id == -1)
             return;
         
-        plugin.getNpcManager().setNPCStatus(player.getUniqueId().toString(), id, OnlineStatus.ONLINE);
+        plugin.getNpcManager().setNPCGlow(player.getUniqueId(), id, OnlineStatus.ONLINE, false);
     }
     
     @EventHandler
     public void onLeave(PlayerQuitEvent event){
         Player player = event.getPlayer();
     
-        if(!plugin.getNpcManager().hasNPC(player))
+        if(!plugin.getNpcManager().hasNPC(player.getUniqueId()))
             return;
     
-        int id = plugin.getNpcConfig().getInt(player.getUniqueId() + ".ID", -1);
+        int id = plugin.getNpcManager().getNPCId(player);
         if(id == -1)
             return;
     
-        plugin.getNpcManager().setNPCStatus(player.getUniqueId().toString(), id, OnlineStatus.OFFLINE);
+        plugin.getNpcManager().setNPCGlow(player.getUniqueId(), id, OnlineStatus.OFFLINE, false);
     }
 }

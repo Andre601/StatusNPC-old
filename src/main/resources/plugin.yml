@@ -10,18 +10,10 @@ main: com.andre601.statusnpc.StatusNPC
 #
 api-version: '1.13'
 
+#
+# We use softdepend over depend as this would cause stacktraces to be thrown in the console (Not pretty!)
+# In our case do we require Citizens, but Essentials (EssentialsX) is optional.
+#
 softdepend:
 - Citizens
 - Essentials
-
-commands:
-  statusnpc:
-    usage: <command> [help|set <player> <id>|remove <player>]
-    description: Sets an NPC as a StatusNPC to display the current status of a player.
-    aliases: [snpc]
-    permission: statusnpc.use
-
-permissions: 
-  statusnpc.use:
-    description: Permission to access the /statusnpc commands.
-    default: op
