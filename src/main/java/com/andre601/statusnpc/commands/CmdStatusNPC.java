@@ -32,6 +32,7 @@ public class CmdStatusNPC extends CommandBase{
     
     @Default
     @SubCommand("help")
+    @Permission("statusnpc.command.help")
     public void sendHelp(final CommandSender sender){
         sender.sendMessage(plugin.getFormatUtil().getLines("Messages.Help"));
     }
