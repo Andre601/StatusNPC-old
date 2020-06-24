@@ -66,7 +66,7 @@ public class StatusNPC extends JavaPlugin{
         }
         send("[&aDependencies&7] Successfully found Citizens! Continue loading...");
     
-        send("[Dependencies (2/2)] Looking for Essentials (EssentialsX)...");
+        send("[Dependencies] Looking for Essentials (EssentialsX)...");
         if(manager.isPluginEnabled("Essentials")){
             essentialsEnabled = true;
             send("[&aDependencies&7] Essentials found! Hooking into it...");
