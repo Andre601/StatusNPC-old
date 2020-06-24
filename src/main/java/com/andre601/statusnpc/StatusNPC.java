@@ -1,7 +1,6 @@
 package com.andre601.statusnpc;
 
 import com.andre601.statusnpc.events.NPCEventManager;
-import com.andre601.statusnpc.events.ServerEventManager;
 import com.andre601.statusnpc.util.FileManager;
 import com.andre601.statusnpc.util.FormatUtil;
 import com.andre601.statusnpc.util.NPCManager;
@@ -12,6 +11,7 @@ import me.mattstudios.mf.base.CommandManager;
 import net.citizensnpcs.api.CitizensAPI;
 import net.citizensnpcs.api.npc.NPC;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.PluginManager;
@@ -29,7 +29,7 @@ public class StatusNPC extends JavaPlugin{
     private FileManager fileManager;
     private FormatUtil formatUtil;
     
-    private List<String> npcs = new ArrayList<>();
+    private final List<String> npcs = new ArrayList<>();
     
     @Override
     public void onLoad(){
@@ -40,57 +40,55 @@ public class StatusNPC extends JavaPlugin{
         npcManager = new NPCManager(this);
         formatUtil = new FormatUtil(this);
         
-        getLogger().info("[Startup - Files] Loading config.yml...");
+        send("[Files] Loading config.yml...");
         saveDefaultConfig();
         debug = getConfig().getBoolean("Debug", false);
-        getLogger().info("[Startup - Files] config.yml loaded!");
+        send("[&aFiles&7] config.yml successfully loaded!");
         
-        getLogger().info("[Startup - Files] Loading npcs.yml...");
+        send("[Files] Loading npcs.yml...");
         fileManager.loadFile();
-        getLogger().info("[Startup - Files] npcs.yml loaded!");
+        send("[&aFiles&7] npcs.yml successfully loaded!");
     }
     
     @Override
     public void onEnable(){
-        getLogger().info("[Startup] Enabling StatusNPC v" + getDescription().getVersion());
+        long start = System.currentTimeMillis();
+        send("Starting StatusNPC v%s", getDescription().getVersion());
     
         PluginManager manager = Bukkit.getPluginManager();
         
-        getLogger().info("[Startup - Dependencies] Looking for Citizens...");
+        send("[Dependencies] Hooking into Citizens...");
         if(!manager.isPluginEnabled("Citizens")){
-            getLogger().warning("[Startup - Dependencies] Could not find Citizens! Make sure it is installed and enabled.");
-            getLogger().warning("[Startup - Dependencies] Disabling plugin...");
+            send("[&cDependencies&7] Couldn't find Citizens! The plugin requires it to work.");
+            send("[&cDependencies&7] Disabling StatusNPC...");
             manager.disablePlugin(this);
             return;
         }
-        getLogger().info("[Startup - Dependencies] Found Citizens! Continue loading...");
+        send("[&aDependencies&7] Successfully found Citizens! Continue loading...");
     
-        getLogger().info("[Startup - Dependencies] Looking for Essentials...");
+        send("[Dependencies (2/2)] Looking for Essentials (EssentialsX)...");
         if(manager.isPluginEnabled("Essentials")){
             essentialsEnabled = true;
-            getLogger().info("[Startup - Dependencies] Found Essentials! Hooking into it...");
+            send("[&aDependencies&7] Essentials found! Hooking into it...");
             new EssentialsEventManager(this);
+        }else{
+            send("[Dependencies] Essentials not found. Continue without it...");
         }
         
-        getLogger().info("[Startup - Events] Loading events...");
+        send("[Events] Loading events...");
         new PlayerEventManager(this);
+        sendDebug("[&aEvents&7] Loaded Player Events");
+        
         new NPCEventManager(this);
+        sendDebug("[&aEvents&7] Loaded NPC Events");
         
-        // We use this setup to delay the reset of NPCs for when the server should/will be ready.
-        try{
-            Class.forName("org.bukkit.event.server.ServerLoadEvent");
-            new ServerEventManager(this);
-        }catch(ClassNotFoundException ignored){
-            sendDebug("Resetting all NPCs...");
-            Bukkit.getScheduler().runTaskLater(this, () -> getNpcManager().loadNPCs(), 1);
-        }
-        getLogger().info("[Startup - Events] Events loaded!");
+        send("[&aEvents&7] Successfully loaded all events!");
         
-        getLogger().info("[Startup - Command] Loading /statusnpc command...");
+        send("[Command] Registering command /statusnpc (/snpc)...");
         setupCmdFramework();
-        getLogger().info("[Startup - Command] Loaded command /statusnpc");
+        send("[&aCommand&7] Successfully registered command!");
         
-        getLogger().info("[Startup] Starting of StatusNPC complete!");
+        send("&aStartup of StatusNPC complete (Took %dms)!", System.currentTimeMillis() - start);
     }
     
     public boolean isEssentialsEnabled(){
@@ -101,9 +99,9 @@ public class StatusNPC extends JavaPlugin{
         return debug;
     }
     
-    public void sendDebug(String msg){
+    public void sendDebug(String msg, Object... args){
         if(isDebug())
-            getLogger().info("[DEBUG] " + msg);
+            send("[DEBUG] " + msg, args);
     }
     
     public NPCManager getNpcManager(){
@@ -154,5 +152,14 @@ public class StatusNPC extends JavaPlugin{
         );
     
         manager.register(new CmdStatusNPC(this));
+    }
+    
+    public void send(String msg, Object... args){
+        getServer().getConsoleSender().sendMessage(
+                ChatColor.translateAlternateColorCodes('&', String.format(
+                        "&7[&f" + getName() + "&7] " + msg,
+                        args
+                ))
+        );
     }
 }

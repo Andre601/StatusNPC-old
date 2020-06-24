@@ -69,7 +69,10 @@ Messages:
     #
     InvalidPlayer: '&cThe provided player is invalid! Make sure they''re online.'
     #
-    # When a invalid id was povided and therefore the NPC wasn't found.
+    # When a invalid id was provided and therefore the NPC wasn't found.
+    #
+    # Placeholder:
+    #   %id%  ->  The provided ID.
     #
     InvalidNPC: '&cCouldn''t find NPC with id %id%. Make sure the id is correct!'
     #
@@ -111,10 +114,10 @@ Messages:
   #
   # The syntax, in which the NPC and linked player are displayed.
   #
-  # Title is the top line of the list
-  # Syntax is the Style in which each linked NPC is listed.
-  # Hover is the text shown, when hovering over an entry.
-  # Unknown is the player name displayed, when it isn't known.
+  # - Title is the top line of the list
+  # - Syntax is the Style in which each linked NPC is listed.
+  # - Hover is the text shown, when hovering over an entry.
+  # - Unknown is the player name displayed, when it isn't known.
   #
   # Placeholders:
   #   %id%      ->  The ID of the NPC.

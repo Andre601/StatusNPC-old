@@ -6,10 +6,33 @@ The status is shown through a colored glow.
 
 ## How to use
 To set a NPC as StatusNPC, use `/snpc set <player> <id>`  
-Replace `<player>` with the player's name and `<id>` with the id of the NPC.
+Replace `<player>` with the Player's name and `<id>` with the id of the NPC.  
+The plugin offers tab-completion for both player names and NPC ids.
 
-Run `/snpc help` to see the available commands.  
-All commands require the permission `statusnpc.use`
+## Commands and Permissions
+
+### `/snpc set <player> <id>`
+> **Permission**: `statusnpc.command.set`
+
+Links the NPC with the provided Player to display a glow color depending on their [Online Status](#supported-states)
+
+Note that setting an NPC for a Player, that has an NPC already linked, will remove the old link.
+
+### `/snpc remove <player>`
+> **Permission**: `statusnpc.command.remove`
+
+Removes the linked NPC and player from the storage.
+
+### `/snpc list`
+> **Permission**: `statusnpc.command.list`
+
+Lists all linked NPCs.  
+The list contains Hover text to provide additional information.
+
+### `/snpc help`
+> **Permission**: `statusnpc.command.help`
+
+Lists all commands available.
 
 ## Supported States
 StatusNPC currently supports the following status types.

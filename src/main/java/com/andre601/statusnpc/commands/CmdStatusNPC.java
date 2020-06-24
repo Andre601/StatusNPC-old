@@ -2,7 +2,7 @@ package com.andre601.statusnpc.commands;
 
 import com.andre601.statusnpc.StatusNPC;
 import com.andre601.statusnpc.util.FormatUtil;
-import com.andre601.statusnpc.util.OnlineStatus;
+import com.andre601.statusnpc.util.NPCManager;
 import me.mattstudios.mf.annotations.*;
 import me.mattstudios.mf.base.CommandBase;
 import net.citizensnpcs.api.npc.NPC;
@@ -22,8 +22,8 @@ import java.util.UUID;
 @Alias("snpc")
 public class CmdStatusNPC extends CommandBase{
     
-    private StatusNPC plugin;
-    private FormatUtil formatUtil;
+    private final StatusNPC plugin;
+    private final FormatUtil formatUtil;
     
     public CmdStatusNPC(StatusNPC plugin){
         this.plugin = plugin;
@@ -81,7 +81,7 @@ public class CmdStatusNPC extends CommandBase{
             }
         }
         
-        plugin.getNpcManager().setNPCGlow(target.getUniqueId(), id, OnlineStatus.ONLINE, true);
+        plugin.getNpcManager().setNPCGlow(target.getUniqueId(), id, NPCManager.OnlineStatus.ONLINE, true);
         sender.sendMessage(formatUtil.getLine("Messages.SetNPC")
                 .replace("%id%", String.valueOf(id))
                 .replace("%name%", npc.getName())

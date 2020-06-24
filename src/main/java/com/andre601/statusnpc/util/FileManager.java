@@ -1,15 +1,14 @@
 package com.andre601.statusnpc.util;
 
 import com.andre601.statusnpc.StatusNPC;
-import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.io.File;
 import java.io.IOException;
 
 public class FileManager{
-    private File npcs;
-    FileConfiguration npcConfig = null;
+    private final File npcs;
+    private YamlConfiguration npcConfig = null;
     
     public FileManager(StatusNPC plugin){
         npcs = new File(plugin.getDataFolder(), "npcs.yml");
@@ -33,7 +32,7 @@ public class FileManager{
         }
     }
     
-    public FileConfiguration getNpcConfig(){
+    public YamlConfiguration getNpcConfig(){
         return npcConfig;
     }
 }

@@ -1,6 +1,7 @@
 package com.andre601.statusnpc.events;
 
 import com.andre601.statusnpc.StatusNPC;
+import net.citizensnpcs.api.event.CitizensEnableEvent;
 import net.citizensnpcs.api.event.NPCCreateEvent;
 import net.citizensnpcs.api.event.NPCRemoveEvent;
 import net.citizensnpcs.api.npc.NPC;
@@ -11,11 +12,17 @@ import org.bukkit.event.Listener;
 
 public class NPCEventManager implements Listener{
     
-    private StatusNPC plugin;
+    private final StatusNPC plugin;
     
     public NPCEventManager(StatusNPC plugin){
         this.plugin = plugin;
         Bukkit.getPluginManager().registerEvents(this, plugin);
+    }
+    
+    @EventHandler
+    public void onCitizensEnabled(CitizensEnableEvent event){
+        plugin.sendDebug("Resetting all Status NPCs...");
+        plugin.getNpcManager().loadNPCs();
     }
     
     @EventHandler

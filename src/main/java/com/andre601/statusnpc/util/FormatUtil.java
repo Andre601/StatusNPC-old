@@ -8,7 +8,7 @@ import java.util.List;
 
 public class FormatUtil{
     
-    private StatusNPC plugin;
+    private final StatusNPC plugin;
     
     public FormatUtil(StatusNPC plugin){
         this.plugin = plugin;

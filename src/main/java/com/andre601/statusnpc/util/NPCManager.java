@@ -14,9 +14,9 @@ import java.util.UUID;
 
 public class NPCManager{
     
-    private StatusNPC plugin;
+    private final StatusNPC plugin;
     
-    private Map<Integer, UUID> loaded = new HashMap<>();
+    private final Map<Integer, UUID> loaded = new HashMap<>();
     
     public NPCManager(StatusNPC plugin){
         this.plugin = plugin;
@@ -42,8 +42,7 @@ public class NPCManager{
             plugin.getFileManager().save();
         }
         
-        loaded.put(npc.getId(), uuid);
-        plugin.sendDebug("Set Color for NPC " + id + " to " + color.getName());
+        loaded.put(id, uuid);
     }
     
     public void loadNPCs(){
@@ -57,7 +56,6 @@ public class NPCManager{
             if(npc == null)
                 continue;
             
-            loaded.put(npc.getId(), UUID.fromString(key));
             setNPCGlow(UUID.fromString(key), npc.getId(), OnlineStatus.OFFLINE, false);
         }
     }
@@ -130,6 +128,20 @@ public class NPCManager{
     }
     
     private void setNPCGlow(NPC npc, NPCColor color){
+        if(color == null)
+            plugin.sendDebug(
+                    "Removing Glow Effect from NPC %s (id: %d)",
+                    npc.getName(),
+                    npc.getId()
+            );
+        else
+            plugin.sendDebug(
+                    "Changing Glow Color of NPC %s (id: %d) to %s",
+                    npc.getName(),
+                    npc.getId(),
+                    color.getName()
+            );
+        
         npc.getTrait(ScoreboardTrait.class).setColor(color == null ? NPCColor.WHITE.getColor() : color.getColor());
         npc.data().setPersistent(NPC.GLOWING_METADATA, color != null);
     }
@@ -170,8 +182,8 @@ public class NPCManager{
         WHITE       (ChatColor.WHITE,        "White"),
         YELLOW      (ChatColor.YELLOW,       "Yellow");
         
-        private ChatColor color;
-        private String name;
+        private final ChatColor color;
+        private final String name;
         
         NPCColor(ChatColor color, String name){
             this.color = color;
@@ -193,6 +205,22 @@ public class NPCManager{
         
         public String getName(){
             return name;
+        }
+    }
+    
+    public enum OnlineStatus{
+        ONLINE("Online"),
+        OFFLINE("Offline"),
+        AFK("AFK");
+    
+        private final String status;
+        
+        OnlineStatus(String status){
+            this.status = status;
+        }
+    
+        public String getStatus(){
+            return status;
         }
     }
 }

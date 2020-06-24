@@ -1,7 +1,7 @@
 package com.andre601.statusnpc.events;
 
 import com.andre601.statusnpc.StatusNPC;
-import com.andre601.statusnpc.util.OnlineStatus;
+import com.andre601.statusnpc.util.NPCManager;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -11,7 +11,7 @@ import org.bukkit.event.player.PlayerQuitEvent;
 
 public class PlayerEventManager implements Listener{
 
-    private StatusNPC plugin;
+    private final StatusNPC plugin;
 
     public PlayerEventManager(StatusNPC plugin){
         this.plugin = plugin;
@@ -29,7 +29,7 @@ public class PlayerEventManager implements Listener{
         if(id == -1)
             return;
         
-        plugin.getNpcManager().setNPCGlow(player.getUniqueId(), id, OnlineStatus.ONLINE, false);
+        plugin.getNpcManager().setNPCGlow(player.getUniqueId(), id, NPCManager.OnlineStatus.ONLINE, false);
     }
     
     @EventHandler
@@ -43,6 +43,6 @@ public class PlayerEventManager implements Listener{
         if(id == -1)
             return;
     
-        plugin.getNpcManager().setNPCGlow(player.getUniqueId(), id, OnlineStatus.OFFLINE, false);
+        plugin.getNpcManager().setNPCGlow(player.getUniqueId(), id, NPCManager.OnlineStatus.OFFLINE, false);
     }
 }
