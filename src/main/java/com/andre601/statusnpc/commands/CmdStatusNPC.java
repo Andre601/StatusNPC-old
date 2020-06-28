@@ -2,14 +2,11 @@ package com.andre601.statusnpc.commands;
 
 import com.andre601.statusnpc.StatusNPC;
 import com.andre601.statusnpc.util.FormatUtil;
+import com.andre601.statusnpc.util.JSONMessage;
 import com.andre601.statusnpc.util.NPCManager;
 import me.mattstudios.mf.annotations.*;
 import me.mattstudios.mf.base.CommandBase;
 import net.citizensnpcs.api.npc.NPC;
-import net.kyori.text.TextComponent;
-import net.kyori.text.event.HoverEvent;
-import net.kyori.text.serializer.gson.GsonComponentSerializer;
-import net.md_5.bungee.chat.ComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
@@ -34,7 +31,52 @@ public class CmdStatusNPC extends CommandBase{
     @SubCommand("help")
     @Permission("statusnpc.command.help")
     public void sendHelp(final CommandSender sender){
-        sender.sendMessage(plugin.getFormatUtil().getLines("Messages.Help"));
+        if(sender instanceof Player){
+            JSONMessage message = JSONMessage.create(formatUtil.formatString(
+                    "&b/snpc help"
+            )).tooltip(formatUtil.formatString(
+                    "&7Displays this help page."
+            )).suggestCommand(
+                    "/snpc help"
+            ).newline().then(formatUtil.formatString(
+                    "&b/snpc list"
+            )).tooltip(formatUtil.formatString(
+                    "&7Lists all linked NPCs."
+            )).suggestCommand(
+                    "/snpc list"
+            ).newline().then(formatUtil.formatString(
+                    "&b/snpc set <player> <id>"
+            )).tooltip(formatUtil.formatString(
+                    "&7Links a Player with an NPC.\n" +
+                    "\n" +
+                    "&cThe Player has to be online (Spigot limitation)!"
+            )).suggestCommand(
+                    "/snpc set "
+            ).newline().then(formatUtil.formatString(
+                    "&b/snpc remove <player>"
+            )).tooltip(formatUtil.formatString(
+                    "&7Removes a linked Player and NPC from the storage.\n" +
+                    "\n" +
+                    "&cThe player has to be online (Spigot limitation)!"
+            )).suggestCommand(
+                    "/snpc remove "
+            ).newline().newline().then(formatUtil.formatString(
+                    "&b&lPro Tip: &fHover over a command for info and click for the command."
+            ));
+            
+            message.send((Player)sender);
+        }else{
+            sender.sendMessage(formatUtil.formatString(
+                    "&b/snpc help\n" +
+                    "  &7Displays this Help page.\n" +
+                    "&b/snpc list\n" +
+                    "  &7Lists all linked NPCs.\n" +
+                    "&b/snpc set <player> <id>\n" +
+                    "  &7Links a Player with an NPC.\n" +
+                    "&b/snpc remove <player>\n" +
+                    "  &7Removes a linked Player and NPC."
+            ));
+        }
     }
     
     @SubCommand("set")
@@ -43,27 +85,37 @@ public class CmdStatusNPC extends CommandBase{
     @WrongUsage("#invalidArgs")
     public void setNPC(final CommandSender sender, final Player target, Integer id){
         if(target == null || id == null){
-            sender.sendMessage(formatUtil.getLine("Messages.Errors.FewArgs.Set"));
+            sender.sendMessage(formatUtil.formatString(
+                    "&cToo few arguments provided! Usage: /snpc set <player> <id>"
+            ));
             return;
         }
         
         if(plugin.getNpcManager().getLoaded().containsKey(id)){
-            sender.sendMessage(formatUtil.getLine("Messages.Errors.AlreadySet"));
+            sender.sendMessage(formatUtil.formatString(
+                    "&cThe provided NPC is already linked to a player!"
+            ));
+            sender.sendMessage(formatUtil.formatString(
+                    "&cEither remove the link, or choose another NPC."
+            ));
             return;
         }
         
         NPC npc = plugin.getNpcManager().getNPC(id);
         if(npc == null){
-            sender.sendMessage(formatUtil.getLine("Messages.Errors.InvalidNPC")
-                    .replace("%id%", String.valueOf(id))
-            );
+            sender.sendMessage(formatUtil.formatString(
+                    "&cCould not find NPC with id " + id + "! Make sure you typed it correctly."
+            ));
             return;
         }
         
         if(!(npc.getEntity() instanceof Player)){
-            sender.sendMessage(formatUtil.getLine("Messages.Errors.NPCNotPlayer")
-                    .replace("%type%", npc.getEntity().getType().toString())
-            );
+            sender.sendMessage(formatUtil.formatString(
+                    "The provided NPC is of type " + npc.getEntity().getType().toString() + " is not allowed!"
+            ));
+            sender.sendMessage(formatUtil.formatString(
+                    "&cOnly NPCs of type PLAYER can be used for this."
+            ));
             return;
         }
         
@@ -71,23 +123,40 @@ public class CmdStatusNPC extends CommandBase{
             int oldId = plugin.getNpcManager().getNPCId(target);
             if(oldId >= 0){
                 plugin.getNpcManager().updateNPC(target, oldId, id);
-                sender.sendMessage(formatUtil.getLine("Messages.SetNPC")
-                        .replace("%id%", String.valueOf(id))
-                        .replace("%name%", npc.getName())
-                        .replace("%player%", target.getName())
-                        .replace("%uuid%", target.getUniqueId().toString())
-                );
-                return;
+            }else{
+                plugin.getNpcManager().setNPCGlow(target.getUniqueId(), id, NPCManager.OnlineStatus.ONLINE, true);
             }
+        }else{
+            plugin.getNpcManager().setNPCGlow(target.getUniqueId(), id, NPCManager.OnlineStatus.ONLINE, true);
         }
         
-        plugin.getNpcManager().setNPCGlow(target.getUniqueId(), id, NPCManager.OnlineStatus.ONLINE, true);
-        sender.sendMessage(formatUtil.getLine("Messages.SetNPC")
-                .replace("%id%", String.valueOf(id))
-                .replace("%name%", npc.getName())
-                .replace("%player%", target.getName())
-                .replace("%uuid%", target.getUniqueId().toString())
-        );
+        if(sender instanceof Player){
+            JSONMessage message = JSONMessage.create(formatUtil.formatString(
+                    "&aSet NPC "
+            )).then(formatUtil.formatString(
+                    "&f%s", 
+                    npc.getName()
+            )).tooltip(formatUtil.formatString(
+                    "&7ID: %d", 
+                    npc.getId()
+            )).then(formatUtil.formatString(
+                    " &aas StatusNPC for Player "
+            )).then(formatUtil.formatString(
+                    "&f%s", 
+                    target.getName()
+            )).tooltip(formatUtil.formatString(
+                    "&7UUID: %s", 
+                    target.getUniqueId().toString()
+            )).then(formatUtil.formatString(
+                    "&a."
+            ));
+            
+            message.send((Player)sender);
+        }else{
+            sender.sendMessage(formatUtil.formatString(
+                    "&aSet NPC " + npc.getName() + " (id: " + npc.getId() + ") as StatusNPC for Player " + target.getName() + "."
+            ));
+        }
     }
     
     @SubCommand("remove")
@@ -96,57 +165,109 @@ public class CmdStatusNPC extends CommandBase{
     @WrongUsage("#invalidArgs")
     public void removeNPC(final CommandSender sender, final Player target){
         if(target == null){
-            sender.sendMessage(plugin.getFormatUtil().getLine("Messages.Errors.FewArgs.Remove"));
+            sender.sendMessage(formatUtil.formatString(
+                    "&cToo few arguments provided! Usage: /snpc remove <player>"
+            ));
             return;
         }
         
         if(plugin.getNpcManager().hasNPC(target.getUniqueId())){
             plugin.getNpcManager().removeNPCGlow(plugin.getNpcManager().getNPCId(target), true);
-            sender.sendMessage(formatUtil.getLine("Messages.RemovedNPC")
-                    .replace("%player%", target.getName())
-            );
+            
+            if(sender instanceof Player){
+                JSONMessage message = JSONMessage.create(formatUtil.formatString(
+                        "&aRemoved Player "
+                )).then(formatUtil.formatString(
+                        "&f%s", 
+                        target.getName()
+                )).tooltip(formatUtil.formatString(
+                        "&7UUID: %s", 
+                        target.getUniqueId().toString()
+                )).then(formatUtil.formatString(
+                        " &afrom Storage."
+                ));
+                
+                message.send((Player)sender);
+            }else{
+                sender.sendMessage(formatUtil.formatString(
+                        "&aRemoved Player &f%s (UUID: %s) &afrom Storage.",
+                        target.getName(),
+                        target.getUniqueId().toString()
+                ));
+            }
         }else{
-            sender.sendMessage(formatUtil.getLine("Messages.Errors.NotSet"));
+            if(sender instanceof Player){
+                JSONMessage message = JSONMessage.create(formatUtil.formatString(
+                        "&cNo NPC set for player "
+                )).then(formatUtil.formatString(
+                        "&f%s", 
+                        target.getName()
+                )).tooltip(formatUtil.formatString(
+                        "&7UUID: %s",
+                        target.getUniqueId().toString()
+                )).then("&c.");
+                
+                message.send((Player)sender);
+            }else{
+                sender.sendMessage(formatUtil.formatString(
+                        "&cNo NPC set for player &f%s (UUID: %s)&c.",
+                        target.getName(),
+                        target.getUniqueId().toString()
+                ));
+            }
         }
     }
     
     @SubCommand("list")
     @Permission("statusnpc.command.list")
     @WrongUsage("#invalidArgs")
-    public void getLinkedNPCs(final Player player){
-        player.spigot().sendMessage(ComponentSerializer.parse(getList()));
-    }
+    public void getLinkedNPCs(final CommandSender sender){
+        Map<NPC, UUID> npcs = plugin.getNpcManager().getNPCs();
     
-    private String getList(){
-        Map<NPC, UUID> npcs = plugin.getNpcManager().getAllNPC();
-        TextComponent.Builder builder = TextComponent.builder(formatUtil.getLine("Messages.List.Title"));
+        if(sender instanceof Player){
+            JSONMessage message = JSONMessage.create(formatUtil.formatString(
+                    "&b==== Linked NPCs (&f%d&b) ====",
+                    npcs.size()
+            )).newline();
+    
+            npcs.forEach((npc, uuid) -> {
+                OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(uuid);
+                String name = offlinePlayer.getName() == null ? "&oUnknown" : offlinePlayer.getName();
         
-        TextComponent.Builder list = TextComponent.builder();
-        npcs.forEach((npc, uuid) -> {
-            OfflinePlayer player = Bukkit.getOfflinePlayer(uuid);
-            String name = player.getName();
-            if(name == null)
-                name = plugin.getFormatUtil().getLine("Messages.List.Unknown");
+                message.newline().then(formatUtil.formatString(
+                        "&f%s &b[&f%d&b]",
+                        npc.getName(),
+                        npc.getId()
+                )).tooltip(formatUtil.formatString(
+                        "&7Playername:\n" +
+                        "  &b%s\n" +
+                        "&7UUID:\n" +
+                        "  &b%s",
+                        name,
+                        uuid.toString()
+                ));
+            });
+    
+            message.send((Player)sender);
+        }else{
+            sender.sendMessage(formatUtil.formatString(
+                    "&b==== Linked NPCs (&f%d&b) ====",
+                    npcs.size()
+            ));
+            sender.sendMessage("");
             
-            list.append(TextComponent.newline())
-                    .append(TextComponent.builder()
-                            .content(plugin.getFormatUtil().getLine("Messages.List.Syntax")
-                                    .replace("%id%", String.valueOf(npc.getId()))
-                                    .replace("%name%", npc.getName())
-                                    .replace("%player%", name)
-                                    .replace("%uuid%", uuid.toString())
-                            ).hoverEvent(HoverEvent.showText(TextComponent.builder()
-                                    .content(plugin.getFormatUtil().getLines("Messages.List.Hover")
-                                            .replace("%id%", String.valueOf(npc.getId()))
-                                            .replace("%name%", npc.getName())
-                                            .replace("%player%", name)
-                                            .replace("%uuid%", uuid.toString())
-                                    )
-                                    .build()
-                            ))
-                    );
-        });
-        
-        return GsonComponentSerializer.INSTANCE.serialize(builder.append(list.build()).build());
+            npcs.forEach((npc, uuid) -> {
+                OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(uuid);
+                String name = offlinePlayer.getName() == null ? "&oUnknown" : offlinePlayer.getName();
+                
+                sender.sendMessage(formatUtil.formatString(
+                        "&f%s &b[&f%d&b] &7- &f%s &b[&f%s&b]",
+                        npc.getName(),
+                        npc.getId(),
+                        name,
+                        uuid.toString()
+                ));
+            });
+        }
     }
 }

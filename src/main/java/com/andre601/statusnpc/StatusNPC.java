@@ -3,6 +3,7 @@ package com.andre601.statusnpc;
 import com.andre601.statusnpc.events.NPCEventManager;
 import com.andre601.statusnpc.util.FileManager;
 import com.andre601.statusnpc.util.FormatUtil;
+import com.andre601.statusnpc.util.JSONMessage;
 import com.andre601.statusnpc.util.NPCManager;
 import com.andre601.statusnpc.commands.CmdStatusNPC;
 import com.andre601.statusnpc.events.EssentialsEventManager;
@@ -11,7 +12,6 @@ import me.mattstudios.mf.base.CommandManager;
 import net.citizensnpcs.api.CitizensAPI;
 import net.citizensnpcs.api.npc.NPC;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.PluginManager;
@@ -104,6 +104,12 @@ public class StatusNPC extends JavaPlugin{
             send("[DEBUG] " + msg, args);
     }
     
+    public void send(String msg, Object... args){
+        getServer().getConsoleSender().sendMessage(formatUtil.formatString(
+                "&7[&f" + getName() + "&7] " + msg, args
+        ));
+    }
+    
     public NPCManager getNpcManager(){
         return npcManager;
     }
@@ -134,32 +140,76 @@ public class StatusNPC extends JavaPlugin{
             return npcs;
         });
         
-        manager.getMessageHandler().register("cmd.no.permission", sender -> 
-            sender.sendMessage(getFormatUtil().getLine("Messages.Errors.NoPerms"))
-        );
-        manager.getMessageHandler().register("cmd.no.exists", sender -> 
-            sender.sendMessage(getFormatUtil().getLine("Messages.Errors.FewArgs.Other"))
-        );
-        manager.getMessageHandler().register("cmd.wrong.usage", sender -> 
-            sender.sendMessage(getFormatUtil().getLine("Messages.Errors.InvalidArgs"))
-        );
-        manager.getMessageHandler().register("cmd.no.console", sender -> 
-            sender.sendMessage(getFormatUtil().getLine("Messages.Errors.NoPlayer"))
-        );
-        
-        manager.getMessageHandler().register("#invalidArgs", sender -> 
-            sender.sendMessage(getFormatUtil().getLine("Messages.Errors.InvalidArgs"))
-        );
-    
-        manager.register(new CmdStatusNPC(this));
-    }
-    
-    public void send(String msg, Object... args){
-        getServer().getConsoleSender().sendMessage(
-                ChatColor.translateAlternateColorCodes('&', String.format(
-                        "&7[&f" + getName() + "&7] " + msg,
-                        args
+        manager.getMessageHandler().register("cmd.no.permission", sender ->
+                sender.sendMessage(formatUtil.formatString(
+                        "&cYou don't have permissions to use this command!"
                 ))
         );
+        manager.getMessageHandler().register("cmd.no.exists", sender -> {
+            if(sender instanceof Player){
+                JSONMessage message = JSONMessage.create(formatUtil.formatString(
+                        "&cInvalid arguments! Run "
+                )).then(formatUtil.formatString(
+                        "&7/snpc help"
+                )).tooltip(formatUtil.formatString(
+                        "&7Click to execute the command."
+                )).runCommand(
+                        "/snpc help"
+                ).then(formatUtil.formatString(
+                        " &cfor all commands."
+                ));
+                
+                message.send((Player)sender);
+            }else{
+                sender.sendMessage(formatUtil.formatString(
+                        "&cInvalid arguments! Run &7/snpc help &cfor all commands."
+                ));
+            }
+        });
+        manager.getMessageHandler().register("cmd.wrong.usage", sender -> {
+            if(sender instanceof Player){
+                JSONMessage message = JSONMessage.create(formatUtil.formatString(
+                        "&cInvalid arguments! Run "
+                )).then(formatUtil.formatString(
+                        "&7/snpc help"
+                )).tooltip(formatUtil.formatString(
+                        "&7Click to execute the command."
+                )).runCommand(
+                        "/snpc help"
+                ).then(formatUtil.formatString(
+                        " &cfor all commands."
+                ));
+        
+                message.send((Player)sender);
+            }else{
+                sender.sendMessage(formatUtil.formatString(
+                        "&cInvalid arguments! Run &7/snpc help &cfor all commands."
+                ));
+            }
+        });
+        
+        manager.getMessageHandler().register("#invalidArgs", sender -> {
+            if(sender instanceof Player){
+                JSONMessage message = JSONMessage.create(formatUtil.formatString(
+                        "&cInvalid arguments! Run "
+                )).then(formatUtil.formatString(
+                        "&7/snpc help"
+                )).tooltip(formatUtil.formatString(
+                        "&7Click to execute the command."
+                )).runCommand(
+                        "/snpc help"
+                ).then(formatUtil.formatString(
+                        " &cfor all commands."
+                ));
+        
+                message.send((Player) sender);
+            }else{
+                sender.sendMessage(formatUtil.formatString(
+                        "&cInvalid arguments! Run &7/snpc help &cfor all commands."
+                ));
+            }
+        });
+    
+        manager.register(new CmdStatusNPC(this));
     }
 }

@@ -105,7 +105,7 @@ public class NPCManager{
         return plugin.getNpcConfig().getInt(player.getUniqueId().toString() + ".ID", -1);
     }
     
-    public Map<NPC, UUID> getAllNPC(){
+    public Map<NPC, UUID> getNPCs(){
         Map<NPC, UUID> npcs = new HashMap<>();
         for(String key : plugin.getNpcConfig().getKeys(false)){
             ConfigurationSection section = plugin.getNpcConfig().getConfigurationSection(key);

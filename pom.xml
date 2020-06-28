@@ -6,7 +6,7 @@
 
     <groupId>net.andre601</groupId>
     <artifactId>StatusNPC</artifactId>
-    <version>1.2.0</version>
+    <version>1.3.0</version>
     
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -34,8 +34,8 @@
                             <shadedPattern>com.andre601.statusnpc.mf</shadedPattern>
                         </relocation>
                         <relocation>
-                            <pattern>net.kyori.text</pattern>
-                            <shadedPattern>com.andre601.statusnpc.text</shadedPattern>
+                            <pattern>com.google.code.gson</pattern>
+                            <shadedPattern>com.andre601.statusnpc.gson</shadedPattern>
                         </relocation>
                     </relocations>
                 </configuration>
@@ -113,18 +113,11 @@
             <version>1.3</version>
         </dependency>
         
-        <!-- Text -->
+        <!-- Google GSON -->
         <dependency>
-            <groupId>net.kyori</groupId>
-            <artifactId>text-api</artifactId>
-            <version>3.0.3</version>
-        </dependency>
-
-        <!-- Text JSON serializer -->
-        <dependency>
-            <groupId>net.kyori</groupId>
-            <artifactId>text-serializer-gson</artifactId>
-            <version>3.0.3</version>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+            <version>2.8.6</version>
         </dependency>
     </dependencies>
 
