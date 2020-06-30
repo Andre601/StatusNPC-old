@@ -38,7 +38,7 @@ public class StatusNPC extends JavaPlugin{
         fileManager = new FileManager(this);
     
         npcManager = new NPCManager(this);
-        formatUtil = new FormatUtil(this);
+        formatUtil = new FormatUtil();
         
         send("[Files] Loading config.yml...");
         saveDefaultConfig();

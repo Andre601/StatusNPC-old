@@ -8,10 +8,13 @@ import me.mattstudios.mf.annotations.*;
 import me.mattstudios.mf.base.CommandBase;
 import net.citizensnpcs.api.npc.NPC;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -27,56 +30,61 @@ public class CmdStatusNPC extends CommandBase{
         this.formatUtil = plugin.getFormatUtil();
     }
     
+    private JSONMessage getTooltip(String msg){
+        return JSONMessage.create(msg).color(ChatColor.GRAY);
+    }
+    
     @Default
+    public void def(final CommandSender sender){
+        sendHelp(sender);
+    }
+    
     @SubCommand("help")
     @Permission("statusnpc.command.help")
     public void sendHelp(final CommandSender sender){
-        if(sender instanceof Player){
-            JSONMessage message = JSONMessage.create(formatUtil.formatString(
-                    "&b/snpc help"
-            )).tooltip(formatUtil.formatString(
-                    "&7Displays this help page."
-            )).suggestCommand(
-                    "/snpc help"
-            ).newline().then(formatUtil.formatString(
-                    "&b/snpc list"
-            )).tooltip(formatUtil.formatString(
-                    "&7Lists all linked NPCs."
-            )).suggestCommand(
-                    "/snpc list"
-            ).newline().then(formatUtil.formatString(
-                    "&b/snpc set <player> <id>"
-            )).tooltip(formatUtil.formatString(
-                    "&7Links a Player with an NPC.\n" +
-                    "\n" +
-                    "&cThe Player has to be online (Spigot limitation)!"
-            )).suggestCommand(
-                    "/snpc set "
-            ).newline().then(formatUtil.formatString(
-                    "&b/snpc remove <player>"
-            )).tooltip(formatUtil.formatString(
-                    "&7Removes a linked Player and NPC from the storage.\n" +
-                    "\n" +
-                    "&cThe player has to be online (Spigot limitation)!"
-            )).suggestCommand(
-                    "/snpc remove "
-            ).newline().newline().then(formatUtil.formatString(
-                    "&b&lPro Tip: &fHover over a command for info and click for the command."
-            ));
-            
-            message.send((Player)sender);
-        }else{
-            sender.sendMessage(formatUtil.formatString(
-                    "&b/snpc help\n" +
-                    "  &7Displays this Help page.\n" +
-                    "&b/snpc list\n" +
-                    "  &7Lists all linked NPCs.\n" +
-                    "&b/snpc set <player> <id>\n" +
-                    "  &7Links a Player with an NPC.\n" +
-                    "&b/snpc remove <player>\n" +
-                    "  &7Removes a linked Player and NPC."
-            ));
-        }
+        JSONMessage msg = JSONMessage.create("==== StatusNPC Help ====")
+                .color(ChatColor.AQUA)
+                .newline()
+                .newline()
+                .then("/snpc help")
+                .color(ChatColor.AQUA)
+                .tooltip(getTooltip("Displays this help page."))
+                .suggestCommand("/snpc help")
+                .newline()
+                .then("/snpc list")
+                .color(ChatColor.AQUA)
+                .tooltip(getTooltip("Lists all linked NPCs."))
+                .suggestCommand("/snpc list")
+                .newline()
+                .then("/snpc set <player> <id>")
+                .color(ChatColor.AQUA)
+                .tooltip(getTooltip("Links a Player and NPC."))
+                .suggestCommand("/snpc set ")
+                .newline()
+                .then("/snpc remove <player>")
+                .color(ChatColor.AQUA)
+                .tooltip(getTooltip("Removes the linked Player from storage."))
+                .suggestCommand("/snpc remove ")
+                .newline()
+                .newline()
+                .then("Pro Tip: ")
+                .color(ChatColor.AQUA)
+                .style(ChatColor.BOLD)
+                .then("Hover over a command for more info and click for the command.")
+                .color(ChatColor.WHITE);
+        
+        formatUtil.sendMsg(
+                sender, 
+                msg,
+                "&b/snpc help",
+                "&7Displays this help page.",
+                "&b/snpc list",
+                "&7Lists all linked NPCs.",
+                "&b/snpc set <player> <id>",
+                "&7Links the Player with an NPC.",
+                "&b/snpc remove <player>",
+                "&7Removes a linked Player and NPC from the storage."
+        );
     }
     
     @SubCommand("set")
@@ -84,38 +92,73 @@ public class CmdStatusNPC extends CommandBase{
     @Permission("statusnpc.command.set")
     @WrongUsage("#invalidArgs")
     public void setNPC(final CommandSender sender, final Player target, Integer id){
+        
+        JSONMessage msg;
         if(target == null || id == null){
-            sender.sendMessage(formatUtil.formatString(
-                    "&cToo few arguments provided! Usage: /snpc set <player> <id>"
-            ));
+            msg = JSONMessage.create("Too few arguments provided! Usage: ")
+                    .color(ChatColor.RED)
+                    .then("/snpc set <player> <id>")
+                    .color(ChatColor.GRAY)
+                    .tooltip(getTooltip("Click to get the command."))
+                    .suggestCommand("/snpc set ");
+            
+            formatUtil.sendMsg(
+                    sender,
+                    msg,
+                    "&cToo few arguments provided! Usage: &7/snpc set <player> <id>"
+            );
             return;
         }
         
         if(plugin.getNpcManager().getLoaded().containsKey(id)){
-            sender.sendMessage(formatUtil.formatString(
-                    "&cThe provided NPC is already linked to a player!"
-            ));
-            sender.sendMessage(formatUtil.formatString(
-                    "&cEither remove the link, or choose another NPC."
-            ));
+            msg = JSONMessage.create("The provided NPC is already linked to a player!")
+                    .color(ChatColor.RED)
+                    .newline()
+                    .then("Either remove the NPC or choose another one.")
+                    .color(ChatColor.RED);
+            
+            formatUtil.sendMsg(
+                    sender,
+                    msg,
+                    "&cThe provided NPC is already linked to a player!",
+                    "&cEither remove the NPC or choose another one."
+            );
             return;
         }
         
         NPC npc = plugin.getNpcManager().getNPC(id);
         if(npc == null){
-            sender.sendMessage(formatUtil.formatString(
-                    "&cCould not find NPC with id " + id + "! Make sure you typed it correctly."
-            ));
+            msg = JSONMessage.create("Couldn't find an NPC with id ")
+                    .color(ChatColor.RED)
+                    .then(String.valueOf(id))
+                    .color(ChatColor.GRAY)
+                    .then("! Make sure you typed it correctly.")
+                    .color(ChatColor.RED);
+            
+            formatUtil.sendMsg(
+                    sender,
+                    msg,
+                    "&cCouldn't find an NPC with id &7" + id + "&c! Make sure you typed it correctly."
+            );
             return;
         }
         
         if(!(npc.getEntity() instanceof Player)){
-            sender.sendMessage(formatUtil.formatString(
-                    "The provided NPC is of type " + npc.getEntity().getType().toString() + " is not allowed!"
-            ));
-            sender.sendMessage(formatUtil.formatString(
-                    "&cOnly NPCs of type PLAYER can be used for this."
-            ));
+            msg = JSONMessage.create("Invalid NPC type ")
+                    .color(ChatColor.RED)
+                    .then(npc.getEntity().getType().toString())
+                    .color(ChatColor.GRAY)
+                    .then("!")
+                    .newline()
+                    .then("Only NPCs of type PLAYER can be used for this.")
+                    .color(ChatColor.RED);
+            
+            formatUtil.sendMsg(
+                    sender,
+                    msg,
+                    "&cInvalid NPC type &7" + npc.getEntity().getType().toString() + "&c!",
+                    "&7Only NPCs of type PLAYER can be used for this."
+            );
             return;
         }
         
@@ -130,33 +173,25 @@ public class CmdStatusNPC extends CommandBase{
             plugin.getNpcManager().setNPCGlow(target.getUniqueId(), id, NPCManager.OnlineStatus.ONLINE, true);
         }
         
-        if(sender instanceof Player){
-            JSONMessage message = JSONMessage.create(formatUtil.formatString(
-                    "&aSet NPC "
-            )).then(formatUtil.formatString(
-                    "&f%s", 
-                    npc.getName()
-            )).tooltip(formatUtil.formatString(
-                    "&7ID: %d", 
-                    npc.getId()
-            )).then(formatUtil.formatString(
-                    " &aas StatusNPC for Player "
-            )).then(formatUtil.formatString(
-                    "&f%s", 
-                    target.getName()
-            )).tooltip(formatUtil.formatString(
-                    "&7UUID: %s", 
-                    target.getUniqueId().toString()
-            )).then(formatUtil.formatString(
-                    "&a."
-            ));
-            
-            message.send((Player)sender);
-        }else{
-            sender.sendMessage(formatUtil.formatString(
-                    "&aSet NPC " + npc.getName() + " (id: " + npc.getId() + ") as StatusNPC for Player " + target.getName() + "."
-            ));
-        }
+        msg = JSONMessage.create("Set NPC ")
+                .color(ChatColor.GREEN)
+                .then(npc.getName())
+                .color(ChatColor.GRAY)
+                .tooltip(getTooltip("ID: " + npc.getId()))
+                .then(" as StatusNPC for Player ")
+                .color(ChatColor.GREEN)
+                .then(target.getName())
+                .color(ChatColor.GRAY)
+                .tooltip(getTooltip("UUID: " + target.getUniqueId()))
+                .then(".")
+                .color(ChatColor.GREEN);
+        
+        formatUtil.sendMsg(
+                sender,
+                msg,
+                "&aSet NPC &7" + npc.getName() + " &a(&7ID: " + npc.getId() + "&a) as StatusNPC for Player &7" +
+                target.getName() + " &a(&7UUID: " + target.getUniqueId() + "&a)."
+        );
     }
     
     @SubCommand("remove")
@@ -164,57 +199,54 @@ public class CmdStatusNPC extends CommandBase{
     @Permission("statusnpc.command.remove")
     @WrongUsage("#invalidArgs")
     public void removeNPC(final CommandSender sender, final Player target){
+        
+        JSONMessage msg;
         if(target == null){
-            sender.sendMessage(formatUtil.formatString(
-                    "&cToo few arguments provided! Usage: /snpc remove <player>"
-            ));
+            msg = JSONMessage.create("Too few arguments provided! Usage: ")
+                    .color(ChatColor.RED)
+                    .then("/snpc remove <player>")
+                    .color(ChatColor.GRAY)
+                    .tooltip(getTooltip("Click to get the command."))
+                    .suggestCommand("/snpc remove ");
+    
+            formatUtil.sendMsg(
+                    sender,
+                    msg,
+                    "&cToo few arguments provided! Usage: &7/snpc remove <player>"
+            );
             return;
         }
         
         if(plugin.getNpcManager().hasNPC(target.getUniqueId())){
             plugin.getNpcManager().removeNPCGlow(plugin.getNpcManager().getNPCId(target), true);
             
-            if(sender instanceof Player){
-                JSONMessage message = JSONMessage.create(formatUtil.formatString(
-                        "&aRemoved Player "
-                )).then(formatUtil.formatString(
-                        "&f%s", 
-                        target.getName()
-                )).tooltip(formatUtil.formatString(
-                        "&7UUID: %s", 
-                        target.getUniqueId().toString()
-                )).then(formatUtil.formatString(
-                        " &afrom Storage."
-                ));
-                
-                message.send((Player)sender);
-            }else{
-                sender.sendMessage(formatUtil.formatString(
-                        "&aRemoved Player &f%s (UUID: %s) &afrom Storage.",
-                        target.getName(),
-                        target.getUniqueId().toString()
-                ));
-            }
+            msg = JSONMessage.create("Removed Player ")
+                    .color(ChatColor.GREEN)
+                    .then(target.getName())
+                    .color(ChatColor.GRAY)
+                    .tooltip(getTooltip("UUID: " + target.getUniqueId()))
+                    .then(" from the Storage.")
+                    .color(ChatColor.GREEN);
+            
+            formatUtil.sendMsg(
+                    sender,
+                    msg,
+                    "&aRemoved Player &7" + target.getName() + " &a(&7UUID: " + target.getUniqueId() + "&a) from the Storage."
+            );
         }else{
-            if(sender instanceof Player){
-                JSONMessage message = JSONMessage.create(formatUtil.formatString(
-                        "&cNo NPC set for player "
-                )).then(formatUtil.formatString(
-                        "&f%s", 
-                        target.getName()
-                )).tooltip(formatUtil.formatString(
-                        "&7UUID: %s",
-                        target.getUniqueId().toString()
-                )).then("&c.");
-                
-                message.send((Player)sender);
-            }else{
-                sender.sendMessage(formatUtil.formatString(
-                        "&cNo NPC set for player &f%s (UUID: %s)&c.",
-                        target.getName(),
-                        target.getUniqueId().toString()
-                ));
-            }
+            msg = JSONMessage.create("No NPC was set for Player ")
+                    .color(ChatColor.RED)
+                    .then(target.getName())
+                    .color(ChatColor.GRAY)
+                    .tooltip(getTooltip("UUID: " + target.getUniqueId()))
+                    .then(".")
+                    .color(ChatColor.RED);
+            
+            formatUtil.sendMsg(
+                    sender,
+                    msg,
+                    "&cNo NPC was set for Player &7" + target.getName() + " &c(&7UUID: " + target.getUniqueId() + "&c)."
+            );
         }
     }
     
@@ -223,51 +255,57 @@ public class CmdStatusNPC extends CommandBase{
     @WrongUsage("#invalidArgs")
     public void getLinkedNPCs(final CommandSender sender){
         Map<NPC, UUID> npcs = plugin.getNpcManager().getNPCs();
-    
-        if(sender instanceof Player){
-            JSONMessage message = JSONMessage.create(formatUtil.formatString(
-                    "&b==== Linked NPCs (&f%d&b) ====",
-                    npcs.size()
-            )).newline();
-    
-            npcs.forEach((npc, uuid) -> {
-                OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(uuid);
-                String name = offlinePlayer.getName() == null ? "&oUnknown" : offlinePlayer.getName();
         
-                message.newline().then(formatUtil.formatString(
-                        "&f%s &b[&f%d&b]",
-                        npc.getName(),
-                        npc.getId()
-                )).tooltip(formatUtil.formatString(
-                        "&7Playername:\n" +
-                        "  &b%s\n" +
-                        "&7UUID:\n" +
-                        "  &b%s",
-                        name,
-                        uuid.toString()
-                ));
-            });
-    
-            message.send((Player)sender);
-        }else{
-            sender.sendMessage(formatUtil.formatString(
-                    "&b==== Linked NPCs (&f%d&b) ====",
-                    npcs.size()
-            ));
-            sender.sendMessage("");
+        JSONMessage msg = JSONMessage.create("==== Linked NPCs (")
+                .color(ChatColor.AQUA)
+                .then(String.valueOf(npcs.size()))
+                .color(ChatColor.WHITE)
+                .then(") ====")
+                .color(ChatColor.AQUA);
+        List<String> lines = new ArrayList<>();
+        lines.add("&b==== Linked NPCs (&f" + npcs.size() + "&b) ====");
+        
+        npcs.forEach((npc, uuid) -> {
+            OfflinePlayer player = Bukkit.getOfflinePlayer(uuid);
+            String name = player.getName() == null ? "Unknown" : player.getName();
             
-            npcs.forEach((npc, uuid) -> {
-                OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(uuid);
-                String name = offlinePlayer.getName() == null ? "&oUnknown" : offlinePlayer.getName();
-                
-                sender.sendMessage(formatUtil.formatString(
-                        "&f%s &b[&f%d&b] &7- &f%s &b[&f%s&b]",
-                        npc.getName(),
-                        npc.getId(),
-                        name,
-                        uuid.toString()
-                ));
-            });
-        }
+            JSONMessage tooltip = JSONMessage.create("==== Linked Player ====")
+                    .color(ChatColor.AQUA)
+                    .newline()
+                    .newline()
+                    .then("Name:")
+                    .color(ChatColor.GRAY)
+                    .newline()
+                    .then("  " + name)
+                    .color(ChatColor.AQUA)
+                    .newline()
+                    .then("UUID:")
+                    .color(ChatColor.GRAY)
+                    .newline()
+                    .then("  " + uuid)
+                    .color(ChatColor.AQUA);
+            
+            msg.newline()
+               .then(npc.getName())
+               .color(ChatColor.WHITE)
+               .tooltip(tooltip)
+               .then(" [")
+               .color(ChatColor.AQUA)
+               .tooltip(tooltip)
+               .then(String.valueOf(npc.getId()))
+               .color(ChatColor.WHITE)
+               .tooltip(tooltip)
+               .then("]")
+               .color(ChatColor.AQUA)
+               .tooltip(tooltip);
+            
+            lines.add("&f" + npc.getName() + " &b[&f" + npc.getId() + "&b] &7- &f" + name + " &b[&f" + uuid + "&b]");
+        });
+        
+        formatUtil.sendMsg(
+                sender,
+                msg,
+                lines.toArray(new String[0])
+        );
     }
 }
