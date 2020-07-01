@@ -157,7 +157,7 @@ public class JSONMessage{
      * @param players The players you want to send this to
      */
     public void send(Player... players) {
-        if (ReflectionHelper.getStringVersion().equalsIgnoreCase("v1_16_R1")) {
+        if (ReflectionHelper.MAJOR_VER >= 16) {
             ReflectionHelper.sendTextPacket(toString(), players);
             return;
         }
@@ -248,6 +248,18 @@ public class JSONMessage{
      */
     public JSONMessage openURL(String url) {
         last().setOnClick(ClickEvent.openURL(url));
+        return this;
+    }
+    
+    /**
+     * Copies the provided text to the Clipboard of the player.
+     * <br>This can only be used in 1.15 or newer and defaults to {@link ClickEvent#suggestCommand(String) Suggesting the text}.
+     * 
+     * @param text The text to copy
+     * @return This {@link JSONMessage} instance
+     */
+    public JSONMessage copyText(String text) {
+        last().setOnClick(ClickEvent.copyText(text));
         return this;
     }
     
@@ -422,10 +434,16 @@ public class JSONMessage{
         public JsonObject toJSON() {
             JsonObject obj = new JsonObject();
             obj.addProperty("action", action);
+            /*
+             * MC 1.16 changed "value" to "contents", but only for Hover events... Don't ask why.
+             * Since this lib only has tooltip and achievement can we simply check if action starts with "show_"
+             */
+            String valueType = (ReflectionHelper.MAJOR_VER >= 16 && action.startsWith("show_")) ? "contents" : "value";
+            
             if (value instanceof JsonElement) {
-                obj.add("value", (JsonElement) value);
+                obj.add(valueType, (JsonElement) value);
             } else {
-                obj.addProperty("value", value.toString());
+                obj.addProperty(valueType, value.toString());
             }
             return obj;
         }
@@ -473,7 +491,7 @@ public class JSONMessage{
         }
         
         /**
-         * Suggests a command by putting inserting it in chat.
+         * Suggests a command by inserting it in chat.
          *
          * @param command The command to suggest
          * @return The {@link MessageEvent}
@@ -500,6 +518,20 @@ public class JSONMessage{
          */
         public static MessageEvent changePage(int page) {
             return new MessageEvent("change_page", page);
+        }
+    
+        /**
+         * Only usable in versions 1.15 and newer.
+         * <br>Will default to putting the command in the chat bar using {@link #suggestCommand(String)} suggestCommand(String)}
+         * 
+         * @param text The text to copy.
+         * @return The {@link MessageEvent}
+         */
+        public static MessageEvent copyText(String text) {
+            if(ReflectionHelper.MAJOR_VER < 15)
+                return suggestCommand(text);
+            
+            return new MessageEvent("copy_to_clipboard", text);
         }
         
     }
