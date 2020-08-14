@@ -1,19 +1,20 @@
 package com.andre601.statusnpc;
 
+import com.andre601.statusnpc.events.EssentialsEventManager;
 import com.andre601.statusnpc.events.NPCEventManager;
 import com.andre601.statusnpc.util.FileManager;
 import com.andre601.statusnpc.util.FormatUtil;
-import com.andre601.statusnpc.util.JSONMessage;
 import com.andre601.statusnpc.util.NPCManager;
 import com.andre601.statusnpc.commands.CmdStatusNPC;
-import com.andre601.statusnpc.events.EssentialsEventManager;
 import com.andre601.statusnpc.events.PlayerEventManager;
 import me.mattstudios.mf.base.CommandManager;
+import me.rayzr522.jsonmessage.JSONMessage;
 import net.citizensnpcs.api.CitizensAPI;
 import net.citizensnpcs.api.npc.NPC;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -22,12 +23,15 @@ import java.util.List;
 
 public class StatusNPC extends JavaPlugin{
     
-    private boolean essentialsEnabled = false;
+    private EssentialsVersion essentials = null;
+    
     private boolean debug;
-
+    
     private NPCManager npcManager;
     private FileManager fileManager;
     private FormatUtil formatUtil;
+    
+    private PluginManager manager;
     
     private final List<String> npcs = new ArrayList<>();
     
@@ -36,7 +40,7 @@ public class StatusNPC extends JavaPlugin{
         getLogger().info("[Startup] Loading StatusNPC v" + getDescription().getVersion());
         
         fileManager = new FileManager(this);
-    
+        
         npcManager = new NPCManager(this);
         formatUtil = new FormatUtil();
         
@@ -54,8 +58,8 @@ public class StatusNPC extends JavaPlugin{
     public void onEnable(){
         long start = System.currentTimeMillis();
         send("Starting StatusNPC v%s", getDescription().getVersion());
-    
-        PluginManager manager = Bukkit.getPluginManager();
+        
+        manager = Bukkit.getPluginManager();
         
         send("[Dependencies] Hooking into Citizens...");
         if(!manager.isPluginEnabled("Citizens")){
@@ -65,15 +69,8 @@ public class StatusNPC extends JavaPlugin{
             return;
         }
         send("[&aDependencies&7] Successfully found Citizens! Continue loading...");
-    
-        send("[Dependencies] Looking for Essentials (EssentialsX)...");
-        if(manager.isPluginEnabled("Essentials")){
-            essentialsEnabled = true;
-            send("[&aDependencies&7] Essentials found! Hooking into it...");
-            new EssentialsEventManager(this);
-        }else{
-            send("[Dependencies] Essentials not found. Continue without it...");
-        }
+        
+        resolveEssentialsDependency();
         
         send("[Events] Loading events...");
         new PlayerEventManager(this);
@@ -92,7 +89,7 @@ public class StatusNPC extends JavaPlugin{
     }
     
     public boolean isEssentialsEnabled(){
-        return essentialsEnabled;
+        return essentials != null;
     }
     
     public boolean isDebug(){
@@ -113,9 +110,11 @@ public class StatusNPC extends JavaPlugin{
     public NPCManager getNpcManager(){
         return npcManager;
     }
+    
     public FileManager getFileManager(){
         return fileManager;
     }
+    
     public FormatUtil getFormatUtil(){
         return formatUtil;
     }
@@ -126,6 +125,10 @@ public class StatusNPC extends JavaPlugin{
     
     public List<String> getNpcs(){
         return npcs;
+    }
+    
+    public EssentialsVersion getEssentials(){
+        return essentials;
     }
     
     private void setupCmdFramework(){
@@ -159,7 +162,7 @@ public class StatusNPC extends JavaPlugin{
                         " &cfor all commands."
                 ));
                 
-                message.send((Player)sender);
+                message.send((Player) sender);
             }else{
                 sender.sendMessage(formatUtil.formatString(
                         "&cInvalid arguments! Run &7/snpc help &cfor all commands."
@@ -179,8 +182,8 @@ public class StatusNPC extends JavaPlugin{
                 ).then(formatUtil.formatString(
                         " &cfor all commands."
                 ));
-        
-                message.send((Player)sender);
+                
+                message.send((Player) sender);
             }else{
                 sender.sendMessage(formatUtil.formatString(
                         "&cInvalid arguments! Run &7/snpc help &cfor all commands."
@@ -201,7 +204,7 @@ public class StatusNPC extends JavaPlugin{
                 ).then(formatUtil.formatString(
                         " &cfor all commands."
                 ));
-        
+                
                 message.send((Player) sender);
             }else{
                 sender.sendMessage(formatUtil.formatString(
@@ -209,7 +212,69 @@ public class StatusNPC extends JavaPlugin{
                 ));
             }
         });
-    
+        
         manager.register(new CmdStatusNPC(this));
+    }
+    
+    private void resolveEssentialsDependency(){
+        send("[Dependencies] Looking for Essentials (EssentialsX)...");
+        
+        Plugin ess = manager.getPlugin("Essentials");
+        if(!manager.isPluginEnabled(ess)){
+            send("[Dependencies] Essentials not found. Continue without it.");
+            return;
+        }
+    
+        send("[Dependencies] Found Essentials! Resolving version...");
+        essentials = new EssentialsVersion(ess);
+        
+        if(essentials.getMajor() == -1){
+            send("[Dependencies] Unable to resolve Essentials version. Continue without it.");
+        }else{
+            if(essentials.supportsCause())
+                send("[Dependencies] Essentials version is at least 2.17.0! Enabled enhanced AFK handling.");
+            
+            send("[&aDependencies&7] Successfully hooked into %s", essentials.toString());
+            new EssentialsEventManager(this);
+        }
+        
+    }
+    
+    public static class EssentialsVersion{
+        private int major;
+        private int minor;
+        private String rev;
+        
+        public EssentialsVersion(Plugin plugin){
+            try{
+                String[] versions = plugin.getDescription().getVersion().split("\\.");
+                
+                major = Integer.parseInt(versions[0]);
+                minor = Integer.parseInt(versions[1]);
+                rev = versions[2];
+            }catch(NumberFormatException | ArrayIndexOutOfBoundsException ignored){
+                major = -1;
+                minor = -1;
+                rev = "null";
+            }
+        }
+    
+        public int getMajor(){
+            return major;
+        }
+    
+        public boolean supportsCause(){
+            return major >= 2 && minor >= 17;
+        }
+        
+        @Override
+        public String toString(){
+            return String.format(
+                    "Essentials v%d.%d.%s",
+                    major,
+                    minor,
+                    rev
+            );
+        }
     }
 }

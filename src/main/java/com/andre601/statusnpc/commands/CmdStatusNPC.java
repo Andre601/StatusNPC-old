@@ -2,10 +2,10 @@ package com.andre601.statusnpc.commands;
 
 import com.andre601.statusnpc.StatusNPC;
 import com.andre601.statusnpc.util.FormatUtil;
-import com.andre601.statusnpc.util.JSONMessage;
 import com.andre601.statusnpc.util.NPCManager;
 import me.mattstudios.mf.annotations.*;
 import me.mattstudios.mf.base.CommandBase;
+import me.rayzr522.jsonmessage.JSONMessage;
 import net.citizensnpcs.api.npc.NPC;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -111,7 +111,7 @@ public class CmdStatusNPC extends CommandBase{
                 .color(ChatColor.WHITE);
         
         formatUtil.sendMsg(
-                sender, 
+                sender,
                 msg,
                 "&b/snpc help",
                 "&7Displays this help page.",
@@ -226,7 +226,7 @@ public class CmdStatusNPC extends CommandBase{
         formatUtil.sendMsg(
                 sender,
                 msg,
-                "&aSet NPC &7" + npc.getName() + " &a(&7ID: " + npc.getId() + "&a) as StatusNPC for Player &7" +
+                "&aSet NPC &7" + npc.getName() + " &a(&7ID: " + npc.getId() + "&a) as StatusNPC for Player &7" + 
                 target.getName() + " &a(&7UUID: " + target.getUniqueId() + "&a)."
         );
     }
@@ -245,7 +245,7 @@ public class CmdStatusNPC extends CommandBase{
                     .color(ChatColor.GRAY)
                     .tooltip(getTooltip("Click to get the command."))
                     .suggestCommand("/snpc remove ");
-    
+            
             formatUtil.sendMsg(
                     sender,
                     msg,

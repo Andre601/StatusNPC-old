@@ -10,9 +10,9 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
 public class PlayerEventManager implements Listener{
-
+    
     private final StatusNPC plugin;
-
+    
     public PlayerEventManager(StatusNPC plugin){
         this.plugin = plugin;
         Bukkit.getPluginManager().registerEvents(this, plugin);
@@ -35,14 +35,14 @@ public class PlayerEventManager implements Listener{
     @EventHandler
     public void onLeave(PlayerQuitEvent event){
         Player player = event.getPlayer();
-    
+        
         if(!plugin.getNpcManager().hasNPC(player.getUniqueId()))
             return;
-    
+        
         int id = plugin.getNpcManager().getNPCId(player);
         if(id == -1)
             return;
-    
+        
         plugin.getNpcManager().setNPCGlow(player.getUniqueId(), id, NPCManager.OnlineStatus.OFFLINE, false);
     }
 }

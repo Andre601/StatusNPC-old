@@ -209,16 +209,16 @@ public class NPCManager{
     }
     
     public enum OnlineStatus{
-        ONLINE("Online"),
+        ONLINE ("Online"),
         OFFLINE("Offline"),
-        AFK("AFK");
-    
+        AFK    ("AFK");
+        
         private final String status;
         
         OnlineStatus(String status){
             this.status = status;
         }
-    
+        
         public String getStatus(){
             return status;
         }

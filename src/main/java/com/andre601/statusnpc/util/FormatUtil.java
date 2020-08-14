@@ -1,5 +1,6 @@
 package com.andre601.statusnpc.util;
 
+import me.rayzr522.jsonmessage.JSONMessage;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;

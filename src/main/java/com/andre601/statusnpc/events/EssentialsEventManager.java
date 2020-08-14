@@ -20,17 +20,24 @@ public class EssentialsEventManager implements Listener{
     @EventHandler
     public void onAFK(AfkStatusChangeEvent event){
         Player player = event.getAffected().getBase();
-    
+        
         if(!plugin.getNpcManager().hasNPC(player.getUniqueId()))
             return;
-    
+        
         int id = plugin.getNpcConfig().getInt(player.getUniqueId() + ".ID", -1);
         if(id == -1)
             return;
         
-        if(event.getValue())
+        if(event.getValue()){
             plugin.getNpcManager().setNPCGlow(player.getUniqueId(), id, NPCManager.OnlineStatus.AFK, false);
-        else
+        }else{
+            if(plugin.getEssentials().supportsCause()){
+                if(event.getCause().equals(AfkStatusChangeEvent.Cause.QUIT)){
+                    plugin.getNpcManager().setNPCGlow(player.getUniqueId(), id, NPCManager.OnlineStatus.OFFLINE, false);
+                    return;
+                }
+            }
             plugin.getNpcManager().setNPCGlow(player.getUniqueId(), id, NPCManager.OnlineStatus.ONLINE, false);
+        }
     }
 }
