@@ -31,7 +31,7 @@ public class NPCManager{
         
         NPCColor color = NPCColor.getColorByName(plugin.getConfig().getString("NPC.Colors." + status.getStatus()));
         if(status == OnlineStatus.AFK && !plugin.isEssentialsEnabled()){
-            plugin.sendDebug("Received Online status AFK, but Essentials is not installed/enabled. Defaulting to GRAY");
+            plugin.sendDebug("Received Online status AFK, but Essentials support is not active. Defaulting to GRAY");
             color = NPCColor.GRAY;
         }
         

@@ -230,9 +230,10 @@ public class StatusNPC extends JavaPlugin{
         
         if(essentials.getMajor() == -1){
             send("[Dependencies] Unable to resolve Essentials version. Continue without it.");
+            essentials = null;
         }else{
             if(essentials.supportsCause())
-                send("[Dependencies] Essentials version is at least 2.17.0! Enabled enhanced AFK handling.");
+                send("[Dependencies] Essentials version is at least 2.18.0! Enabled enhanced AFK handling.");
             
             send("[&aDependencies&7] Successfully hooked into %s", essentials.toString());
             new EssentialsEventManager(this);
@@ -243,7 +244,7 @@ public class StatusNPC extends JavaPlugin{
     public static class EssentialsVersion{
         private int major;
         private int minor;
-        private String rev;
+        private int rev;
         
         public EssentialsVersion(Plugin plugin){
             try{
@@ -251,11 +252,11 @@ public class StatusNPC extends JavaPlugin{
                 
                 major = Integer.parseInt(versions[0]);
                 minor = Integer.parseInt(versions[1]);
-                rev = versions[2];
+                rev = Integer.parseInt(versions[2]);
             }catch(NumberFormatException | ArrayIndexOutOfBoundsException ignored){
                 major = -1;
                 minor = -1;
-                rev = "null";
+                rev = -1;
             }
         }
     
@@ -264,7 +265,7 @@ public class StatusNPC extends JavaPlugin{
         }
     
         public boolean supportsCause(){
-            return major >= 2 && minor >= 17;
+            return major >= 2 && minor >= 18 && rev >= 0;
         }
         
         @Override
