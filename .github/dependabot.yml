@@ -1,0 +1,10 @@
+version: 2
+updates:
+  - package-ecosystem: "maven"
+    directory: "/" # Location of package manifests
+    schedule:
+      interval: "daily"
+      time: "15:00"
+      timezone: "Europe/Zurich"
+    labels:
+    - 'Type: Update (Dependencies)'
