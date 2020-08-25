@@ -114,7 +114,7 @@
         <dependency>
             <groupId>me.mattstudios.utils</groupId>
             <artifactId>matt-framework</artifactId>
-            <version>1.3</version>
+            <version>1.4.6</version>
         </dependency>
         
         <!-- JSONMessage -->
